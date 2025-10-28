@@ -9,3 +9,4 @@ scipy
 jupyter
 streamlit_jupyter
 nbdev
+pydeck
