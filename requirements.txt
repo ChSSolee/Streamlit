@@ -10,3 +10,6 @@ jupyter
 streamlit_jupyter
 nbdev
 pydeck
+finance-datareader
+beautifulsoup4
+koreanize-matplotlib

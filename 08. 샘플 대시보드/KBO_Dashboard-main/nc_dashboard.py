@@ -8,6 +8,8 @@ import plotly.express as px
 import plotly.graph_objects as go
 import matplotlib.pyplot as plt
 from matplotlib import rc
+import warnings
+warnings.filterwarnings("ignore", message=".*deprecated.*Plotly.*")
 
 st.set_page_config(
     page_title = 'KBO NC Dinos Dashboard',
@@ -118,7 +120,7 @@ if year >= 2013:
     
     # 선수 프로필 이미지
     with col1:
-        st.image(bat_image.loc[bat_image['Player Name'] == nc_player, 'Image'].values[0], use_column_width = True)
+        st.image(bat_image.loc[bat_image['Player Name'] == nc_player, 'Image'].values[0], width='stretch')
     
     # 선수 세부정보
     with col2:
@@ -135,68 +137,151 @@ if year >= 2013:
         st.write(f'득점:{nc_p_r} / 타점:{nc_p_rbi}')
 
     with col3:
-        # NC선수의 팀 내 홈런 기여 비율
         team_hr = nc_bat.loc[nc_bat['batter_name'] != nc_player, 'HR'].sum()
         player_hr = nc_bat.loc[nc_bat['batter_name'] == nc_player]['HR'].sum()
-        hr_ratio_df = pd.DataFrame({'Category': ['팀', '개인'],
-                                    'Count': [team_hr, player_hr]})
-        hr_ratio_df['Category'] = pd.Categorical(hr_ratio_df['Category'], categories = ['개인', '팀'], ordered = True)
-        hr_ratio_df = hr_ratio_df.sort_values('Category', ascending = True)
-        
-        fig = go.Figure(data=go.Pie(labels = hr_ratio_df['Category'], values = hr_ratio_df['Count'], hole=0.5,
-                                    marker = dict(colors = nc_colors),
-                                    sort = False,
-                                    hovertemplate = f'<b>선수명: {nc_player} </b><br><b>연도: {str(year)}</b></br>'+'<b>%{label}: %{value}</b>',
-                                    title=f'Total: {player_hr+team_hr}',
-                                    titlefont=dict(color='black', size=14)))
-        fig.update_layout(legend = dict(font = dict(size = 14)),
-                          margin = dict(t = 50, b = 0, l = 0, r = 0),
-                          title = {'text': "팀내 홈런 기여도",
-                                   'x':0.38,
-                                   'xanchor': 'center'},
-                          height = 250)
-        st.plotly_chart(fig, theme = 'streamlit', use_container_width = True)
+
+        hr_ratio_df = pd.DataFrame({
+            'Category': ['팀', '개인'],
+            'Count': [team_hr, player_hr]
+        })
+        hr_ratio_df['Category'] = pd.Categorical(
+            hr_ratio_df['Category'],
+            categories=['개인', '팀'],
+            ordered=True
+        )
+        hr_ratio_df = hr_ratio_df.sort_values('Category', ascending=True)
+
+        fig = go.Figure(
+            data=go.Pie(
+                labels=hr_ratio_df['Category'],
+                values=hr_ratio_df['Count'],
+                hole=0.5,
+                marker=dict(colors=nc_colors),
+                sort=False,
+                hovertemplate=(
+                    f"<b>선수명: {nc_player}</b><br>"
+                    f"<b>연도: {year}</b><br>"
+                    "<b>%{label}: %{value}</b>"
+                ),
+                textfont=dict(size=14, color='black')
+            )
+        )
+
+        fig.update_layout(
+            title=dict(
+                text=f"팀내 홈런 기여도<br><sub>Total: {player_hr + team_hr}</sub>",
+                x=0.5,  # 중앙 정렬
+                font=dict(size=16, color='black')
+            ),
+            legend=dict(font=dict(size=14)),
+            margin=dict(t=50, b=0, l=0, r=0),
+            height=250
+        )
+
+        st.plotly_chart(
+            fig,
+            config={
+                "displayModeBar": False,
+                "responsive": True,
+            },
+            use_container_width=True,
+            theme="streamlit"
+        )
         
     with col4:
-        # NC선수의 볼넷 대비 삼진 비율
         player_bb_so = nc_bat.loc[nc_bat['batter_name'] == nc_player][['BB', 'SO']]
-        player_bb_so = player_bb_so.rename(columns = {'BB': '볼넷', 'SO': '삼진'})
-        bbk = np.where(player_bb_so['삼진'] == 0, player_bb_so['볼넷'], round(player_bb_so['볼넷']/player_bb_so['삼진'],3))[0]
-         
+        player_bb_so = player_bb_so.rename(columns={'BB': '볼넷', 'SO': '삼진'})
+        bbk = np.where(player_bb_so['삼진'] == 0,
+                    player_bb_so['볼넷'],
+                    round(player_bb_so['볼넷'] / player_bb_so['삼진'], 3))[0]
+
         if (player_bb_so['볼넷'] + player_bb_so['삼진']).values[0] != 0:
             player_bb_so = player_bb_so.T.reset_index()
             player_bb_so.columns = ['Category', 'Count']
-            player_bb_so['Category'] = pd.Categorical(player_bb_so['Category'], categories = ['볼넷', '삼진'], ordered = True)
-    
-            fig = go.Figure(data=go.Pie(labels = player_bb_so['Category'], values = player_bb_so['Count'], hole=0.5,
-                                        marker = dict(colors = nc_colors),
-                                        sort = False,
-                                        hovertemplate = f'<b>선수명: {nc_player} </b><br><b>연도: {str(year)}</b></br>'+'<b>%{label}: %{value}</b>',
-                                        title=f'BB/K: {bbk}',
-                                        titlefont=dict(color='black', size=14)))
-            fig.update_layout(legend = dict(font = dict(size = 14)),
-                              margin = dict(t = 50, b = 0, l = 0, r = 0),
-                              title = {'text': "삼진 대비 볼넷 비율",
-                                       'x':0.38,
-                                       'xanchor': 'center'},
-                              height = 250)
-            st.plotly_chart(fig, theme = 'streamlit', use_container_width = True)
+            player_bb_so['Category'] = pd.Categorical(
+                player_bb_so['Category'],
+                categories=['볼넷', '삼진'],
+                ordered=True
+            )
+
+            fig = go.Figure(
+                data=go.Pie(
+                    labels=player_bb_so['Category'],
+                    values=player_bb_so['Count'],
+                    hole=0.5,
+                    marker=dict(colors=nc_colors),
+                    sort=False,
+                    hovertemplate=(
+                        f"<b>선수명: {nc_player}</b><br>"
+                        f"<b>연도: {year}</b><br>"
+                        "<b>%{label}: %{value}</b>"
+                    ),
+                    textfont=dict(size=14, color='black')
+                )
+            )
+
+            fig.update_layout(
+                title=dict(
+                    text=f"삼진 대비 볼넷 비율<br><sub>BB/K: {bbk}</sub>",
+                    x=0.5,
+                    font=dict(size=16, color='black')
+                ),
+                legend=dict(font=dict(size=14)),
+                margin=dict(t=50, b=0, l=0, r=0),
+                height=250
+            )
+
+            st.plotly_chart(
+                fig,
+                config={
+                    "displayModeBar": False,
+                    "responsive": True,
+                },
+                use_container_width=True,
+                theme="streamlit"
+            )
+
 
         # 해당 연도에 데이터가 모두 0인 경우
         else:
             empty = pd.DataFrame({'Category': ['볼넷', '삼진'], 'Count': [1, 1]})
-            fig = go.Figure(data=go.Pie(labels = empty['Category'], values = empty['Count'], hole=0.5,
-                                        marker = dict(colors = nc_colors),
-                                        sort = False,
-                                        hovertemplate = f'<b>선수명: {nc_player} </b><br><b>연도: {str(year)}</b></br>'+'<b>%{label}: 0</b>',
-                                        title=f'BB/K: {bbk}'))
-            fig.update_layout(legend = dict(font = dict(size = 14)),
-                              margin = dict(t = 50, b = 0, l = 0, r = 0),
-                              title = {'text': "삼진 대비 볼넷 비율",
-                                       'x':0.4,
-                                       'xanchor': 'center'},
-                              height = 250)
-            st.plotly_chart(fig, theme = 'streamlit', use_container_width = True)
+
+            fig = go.Figure(
+                data=go.Pie(
+                    labels=empty['Category'],
+                    values=empty['Count'],
+                    hole=0.5,
+                    marker=dict(colors=nc_colors),
+                    sort=False,
+                    hovertemplate=(
+                        f"<b>선수명: {nc_player}</b><br>"
+                        f"<b>연도: {year}</b><br>"
+                        "<b>%{label}: 0</b>"
+                    ),
+                    textfont=dict(size=14, color='black')
+                )
+            )
+
+            fig.update_layout(
+                title=dict(
+                    text=f"삼진 대비 볼넷 비율<br><sub>BB/K: {bbk}</sub>",
+                    x=0.5,
+                    font=dict(size=16, color='black')
+                ),
+                legend=dict(font=dict(size=14)),
+                margin=dict(t=50, b=0, l=0, r=0),
+                height=250
+            )
+
+            st.plotly_chart(
+                fig,
+                config={
+                    "displayModeBar": False,
+                    "responsive": True,
+                },
+                use_container_width=True,
+                theme="streamlit"
+            )
 
     # 선택된 선수의 연도별 OPS 차트
     with col5:
@@ -217,8 +302,15 @@ if year >= 2013:
                           margin = dict(t = 50, b = 0, l = 0, r = 0),
                           yaxis_title='OPS',
                           height = 260)
-        st.plotly_chart(fig, theme = 'streamlit', use_container_width = True)
-        
+        st.plotly_chart(
+            fig,
+            config={
+                "displayModeBar": False,
+                "responsive": True,
+            },
+            use_container_width=True,
+            theme="streamlit"
+        )        
 else:
     st.markdown('NC Dinos는 **2013년**에 창단했습니다.')
 
@@ -271,8 +363,15 @@ with tab_stat:
             margin = dict(t=50, l=0, r=0),
             title = f'{year}년 구단별 평균 타격 지표',
             height = 450)
-        st.plotly_chart(fig, theme = 'streamlit', use_container_width = True)
-    
+        st.plotly_chart(
+            fig,
+            config={
+                "displayModeBar": False,
+                "responsive": True,
+            },
+            use_container_width=True,
+            theme="streamlit"
+        )    
     # 선택된 연도의 구단별 포지션별 OPS
     with col2:
         temp_bat = bat_df.loc[bat_df['year'] == year, :]
@@ -287,7 +386,15 @@ with tab_stat:
                               height=450,
                               margin=dict(t=50, l=0, r=0),
                               title=f'구단별 {selected_positions} OPS Boxplots',)
-            st.plotly_chart(fig, theme='streamlit', use_container_width=True)
+            st.plotly_chart(
+                fig,
+                config={
+                    "displayModeBar": False,
+                    "responsive": True,
+                },
+                use_container_width=True,
+                theme="streamlit"
+            )
         except:
             fig, ax = plt.subplots()
             st.plotly_chart(fig)
@@ -315,7 +422,7 @@ with tab_rank:
         st.dataframe(team_tmp,
                      hide_index = True,
                      height = 387,
-                     use_container_width = True)
+                     width='stretch')
     
     with col2:
         # 연도별 팀 순위 라인차트
@@ -342,4 +449,12 @@ with tab_rank:
             yaxis = dict(range=[10.5, 0.5]),
             margin = dict(l = 0, r = 0, t = 50, b = 10),
             height = 387)
-        st.plotly_chart(fig, theme = "streamlit", use_container_width = True)
+        st.plotly_chart(
+            fig,
+            config={
+                "displayModeBar": False,
+                "responsive": True,
+            },
+            use_container_width=True,
+            theme="streamlit"
+        )

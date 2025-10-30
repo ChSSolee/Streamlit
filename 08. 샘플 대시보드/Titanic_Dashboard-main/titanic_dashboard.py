@@ -31,7 +31,12 @@ st.sidebar.header("Titanic `Dashboard`")
 st.markdown("# RMS TITANIC: 승객 국적에 따른 생존율 변화")
 c1, c2, c3 = st.columns(3, gap = "large")
 c1.metric("No. of Passengers on Board", "{0}".format(len(df)))
-c2.metric("Total Survival Rate", "{0}%".format(round(df["survived"].value_counts(normalize = True)[1]*100,2)))
+c2.metric(
+    "Total Survival Rate",
+    "{0}%".format(
+        round(df["survived"].value_counts(normalize=True).get(1, 0) * 100, 2)
+    )
+)
 c3.metric("No. of Different Nationalities", "{0}".format(df["country"].nunique()) )
             
 
