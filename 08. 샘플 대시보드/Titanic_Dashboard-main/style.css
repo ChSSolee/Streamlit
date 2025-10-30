@@ -1,0 +1,41 @@
+/* Card */
+/* Adapted from https://startbootstrap.com/theme/sb-admin-2 */
+div.css-1fjr796.e1tzin5v1 {
+    background-color: #EEEEEE;
+    border: 1px solid #CCCCCC;
+    padding: 1% 1% 1% 10%;
+    border-radius: 7px;
+    
+    border-left: 0.5rem solid #08519C !important;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15) !important;
+    
+}
+
+
+
+label.css-wvv94f.e16fv1kl2 {
+    color: 08549C !important;
+    font-weight: 1000 !important;
+    text-transform: uppercase !important;
+}
+
+
+div.css-ocqkz7.e1tzin5v3{
+    border: 1px solid #CCCCCC;
+    border-radius: 7px;
+}
+
+.css-1vzeuhh{
+    background-color: rgb(8, 84, 156);
+}    
+
+.css-10y5sf6{
+    color: rgb(8, 84, 156)
+}
+
+
+div.block-container.css-z5fcl4.egzxvld4 {
+  margin-top: -5em;
+}
+
+

@@ -1,0 +1,6 @@
+finance-datareader
+beautifulsoup4
+plotly
+matplotlib
+koreanize-matplotlib
+seaborn
