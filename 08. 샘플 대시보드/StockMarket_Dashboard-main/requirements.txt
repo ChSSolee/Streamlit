@@ -1,6 +1,6 @@
 finance-datareader
 beautifulsoup4
+koreanize-matplotlib
 plotly
 matplotlib
-koreanize-matplotlib
 seaborn
